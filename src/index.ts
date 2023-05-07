@@ -13,11 +13,13 @@ const app = express();
 
 app.use(express.static(__dirname + '/view'));
 
-app.use(cors());
+const port = process.env?.port || 443;
+const origin_url = process.env?.origin_url || `http://localhost:${port}`;
+
+app.use(cors({ origin: origin_url, credentials: false }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const port = process.env?.port || 443;
 
 app.listen(port, () => {
     console.log(`Backend initialised on port : ${port}`);

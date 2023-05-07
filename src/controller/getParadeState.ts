@@ -1,4 +1,4 @@
-import getParadeStateModel from '@model/getParadeState';
+import { getParadeStateModel } from '@model';
 import { Express } from 'express';
 
 export default function getParadeState(app: Express) {
