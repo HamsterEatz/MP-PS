@@ -4,47 +4,67 @@ const remarksButton = document.getElementById('getRemarksButton');
 
 const copyToClipboardButton = document.getElementById('copyToClipboardButton');
 
-const port = 3001;
+const origin_url = `${location.origin}/api`;
 
 fpButton.onclick = (e) => {
     copyToClipboardButton.style.visibility = "hidden";
+    document.getElementById("res").innerHTML = "LOADING...";
+    fpButton.disabled = true;
+    lpButton.disabled = true;
+    remarksButton.disabled = true;
 
     $.ajax({
         type: 'GET',
-        url: `http://localhost:${port}/firstParadeState`,
-        accept: 'Access-Control-Allow-Origin: *, Access-Control-Allow-Methods: POST, GET, OPTIONS, Access-Control-Allow-Headers: Content-Type',
+        url: `${origin_url}/firstParadeState`,
         cors: true,
         success: function (data) {
             document.getElementById("res").innerHTML = data;
             copyToClipboardButton.style.visibility = "visible";
+            fpButton.disabled = false;
+            lpButton.disabled = false
+            remarksButton.disabled = false;
         }
     });
 }
 
 lpButton.onclick = (e) => {
     copyToClipboardButton.style.visibility = "hidden";
+    document.getElementById("res").innerHTML = "LOADING...";
+    fpButton.disabled = true;
+    lpButton.disabled = true;
+    remarksButton.disabled = true;
 
     $.ajax({
         type: 'GET',
-        url: `http://localhost:${port}/lastParadeState`,
+        url: `${origin_url}/lastParadeState`,
         cors: true,
         success: function (data) {
             document.getElementById("res").innerHTML = data;
             copyToClipboardButton.style.visibility = "visible";
+            fpButton.disabled = false;
+            lpButton.disabled = false;
+            remarksButton.disabled = false;
         }
     });
 }
 
 remarksButton.onclick = (e) => {
     copyToClipboardButton.style.visibility = "hidden";
+    document.getElementById("res").innerHTML = "LOADING...";
+    fpButton.disabled = true;
+    lpButton.disabled = true;
+    remarksButton.disabled = true;
 
     $.ajax({
         type: 'GET',
-        url: `http://localhost:${port}/remarks`,
+        url: `${origin_url}/remarks`,
         cors: true,
         success: function (data) {
             document.getElementById("res").innerHTML = data;
             copyToClipboardButton.style.visibility = "visible";
+            fpButton.disabled = false;
+            lpButton.disabled = false;
+            remarksButton.disabled = false;
         }
     });
 }

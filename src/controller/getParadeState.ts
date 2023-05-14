@@ -1,7 +1,7 @@
 import { getParadeStateModel } from '@model';
-import { Express } from 'express';
+import { Router } from 'express';
 
-export default function getParadeState(app: Express) {
+export default function getParadeState(app: Router) {
     app.get('/firstParadeState', async (req, res) => {
         const data = await getParadeStateModel(true);
         res.send(data);

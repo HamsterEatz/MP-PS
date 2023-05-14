@@ -1,7 +1,8 @@
-import { PRESENT } from "../constants";
+import { PRESENT, LEGENDS } from "../constants";
+import moment, { Moment } from 'moment';
 import gSheetsInit from "./gSheetsInit";
 
-export default async function getParadeState(isFirstParade: boolean, currentDay: number) {
+export default async function getParadeState(isFirstParade: boolean, date: Moment) {
     const doc = await gSheetsInit();
 
     const sheet = doc.sheetsByIndex[0];
@@ -12,6 +13,8 @@ export default async function getParadeState(isFirstParade: boolean, currentDay:
     const absent: string[] = new Array();
     const unaccounted: string[] = new Array();
 
+    const day = date.day();
+
     for (const row of rows) {
         const name = row?.Name?.trim();
         const rank = row?.Rank?.trim();
@@ -21,7 +24,7 @@ export default async function getParadeState(isFirstParade: boolean, currentDay:
             continue;
         }
 
-        const colIndex = isFirstParade ? currentDay * 2 + 1 : currentDay * 2 + 2;
+        const colIndex = isFirstParade ? day * 2 + 1 : day * 2 + 2;
         const state = String(sheet.getCell(row.rowIndex - 1, colIndex).value)?.trim();
 
         if (state.toUpperCase() === PRESENT) {
@@ -29,13 +32,74 @@ export default async function getParadeState(isFirstParade: boolean, currentDay:
             continue;
         }
 
-        if (state?.includes("from") || remarks?.includes("from")) {
-            const text = state.includes("from") ? state : remarks;
-            absent.push(`${rank} ${name} (${text})`);
+        // Unaccounted
+        if (!state || !state?.trim() || state === "null") {
+            unaccounted.push(`${rank} ${name}`);
             continue;
         }
 
-        unaccounted.push(`${rank} ${name}`);
+        if (state?.includes("from")) {
+            absent.push(`${rank} ${name} (${state})`);
+            continue;
+        } else if (remarks?.includes("from")) {
+            let isAppended = false;
+            for (const legend of Object.values(LEGENDS)) {
+                if (state === legend) {
+                    const dateRange = remarks.split("from ")[1];
+                    const splittedDates = dateRange.split("-");
+                    const startDate = moment(splittedDates[0], 'DD/MM');
+                    const endDate = moment(splittedDates[1], 'DD/MM');
+
+                    if (date.isBetween(startDate, endDate) || date.isSame(startDate, 'day') || date.isSame(endDate, 'day')) {
+                        absent.push(`${rank} ${name} (${remarks})`);
+                        isAppended = true;
+                    }
+                    break;
+                }
+            }
+            if (isAppended) {
+                continue;
+            }
+        } else {
+            let hasDuration = false;
+            for (const legend of Object.values(LEGENDS)) {
+                if (state.trim().toUpperCase().includes(legend)) {
+                    // Calculate duration
+                    const data = row._rawData;
+                    let daysToSubtractToStartDate = 0;
+                    let daysToAddToEndDate = 0;
+
+                    // Calculate startDate
+                    for (let y = day * 2 + (isFirstParade ? 0 : 1); y > 2; y--) {
+                        if (data[y] !== legend) {
+                            const startDay = Math.floor(y / 2);
+                            daysToSubtractToStartDate = day - startDay;
+                            break;
+                        }
+                    }
+
+                    // Calculate endDate
+                    for (let y = day * 2 + (isFirstParade ? 2 : 3); y < 13; y++) {
+                        if (!data[y] || data[y] !== legend) {
+                            const endDay = Math.floor((y - 2) / 2);
+                            daysToAddToEndDate = endDay - day;
+                            break;
+                        }
+                    }
+
+                    const startDate = date.clone().subtract(daysToSubtractToStartDate, 'days');
+                    const endDate = date.clone().add(daysToAddToEndDate, 'days');
+
+                    absent.push(`${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})`);
+                    hasDuration = true;
+                    break;
+                }
+            }
+
+            if (!hasDuration) {
+                absent.push(`${rank} ${name} (${state})`);
+            }
+        }
     }
 
     return { present, absent, unaccounted };
