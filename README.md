@@ -1,4 +1,4 @@
-# Telegram Parade State Bot
+# Manpower Branch Parade State Webpage
 
 > ### Note: This is made only for personnels within `Stagmont Camp HQ Signals Command & Systems Manpower Branch` only!
 
@@ -11,7 +11,7 @@ This project aims to simplify the workflow for POCs, when tasked to submit parad
 > # `TO BE UPDATED!`
 
 #### Development
-The bot is created using TypeScript NodeJS.
+The webpage is created using TypeScript ExpressJS.
 
 Semantic commit messages also help with better workflows.
 
