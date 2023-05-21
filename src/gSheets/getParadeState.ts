@@ -41,7 +41,9 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
         if (state?.includes("from")) {
             absent.push(`${rank} ${name} (${state})`);
             continue;
-        } else if (remarks?.includes("from")) {
+        }
+
+        if (remarks?.includes("from")) {
             let isAppended = false;
             for (const legend of Object.values(LEGENDS)) {
                 if (state === legend) {
@@ -60,46 +62,47 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
             if (isAppended) {
                 continue;
             }
-        } else {
-            let hasDuration = false;
-            for (const legend of Object.values(LEGENDS)) {
-                if (state.trim().toUpperCase().includes(legend)) {
-                    // Calculate duration
-                    const data = row._rawData;
-                    let daysToSubtractToStartDate = 0;
-                    let daysToAddToEndDate = 0;
+        }
 
-                    // Calculate startDate
-                    for (let y = day * 2 + (isFirstParade ? 0 : 1); y > 2; y--) {
-                        if (data[y] !== legend) {
-                            const startDay = Math.floor(y / 2);
-                            daysToSubtractToStartDate = day - startDay;
-                            break;
-                        }
+        // Calculate duration
+        let hasDuration = false;
+        for (const legend of Object.values(LEGENDS)) {
+            if (state.trim().toUpperCase().includes(legend)) {
+                const data = row._rawData;
+                let daysToSubtractToStartDate = 0;
+                let daysToAddToEndDate = 0;
+
+                // Calculate startDate
+                for (let y = day * 2 + (isFirstParade ? 0 : 1); y > 2; y--) {
+                    if (data[y] !== legend) {
+                        const startDay = Math.floor(y / 2);
+                        daysToSubtractToStartDate = day - startDay;
+                        break;
                     }
-
-                    // Calculate endDate
-                    for (let y = day * 2 + (isFirstParade ? 2 : 3); y < 13; y++) {
-                        if (!data[y] || data[y] !== legend) {
-                            const endDay = Math.floor((y - 2) / 2);
-                            daysToAddToEndDate = endDay - day;
-                            break;
-                        }
-                    }
-
-                    const startDate = date.clone().subtract(daysToSubtractToStartDate, 'days');
-                    const endDate = date.clone().add(daysToAddToEndDate, 'days');
-
-                    absent.push(`${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})`);
-                    hasDuration = true;
-                    break;
                 }
-            }
 
-            if (!hasDuration) {
-                absent.push(`${rank} ${name} (${state})`);
+                // Calculate endDate
+                for (let y = day * 2 + (isFirstParade ? 2 : 3); y < 13; y++) {
+                    if (!data[y] || data[y] !== legend) {
+                        const endDay = Math.floor((y - 2) / 2);
+                        daysToAddToEndDate = endDay - day;
+                        break;
+                    }
+                }
+
+                const startDate = date.clone().subtract(daysToSubtractToStartDate, 'days');
+                const endDate = date.clone().add(daysToAddToEndDate, 'days');
+
+                absent.push(`${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})`);
+                hasDuration = true;
+                break;
             }
         }
+        if (hasDuration) {
+            continue;
+        }
+
+        absent.push(`${rank} ${name} (${state})`);
     }
 
     return { present, absent, unaccounted };
