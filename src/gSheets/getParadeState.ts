@@ -9,9 +9,9 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
     const rows = await sheet.getRows();
     await sheet.loadCells();
 
-    const present: string[] = new Array();
-    const absent: string[] = new Array();
-    const unaccounted: string[] = new Array();
+    const present: {}[] = new Array();
+    const absent: {}[] = new Array();
+    const unaccounted: {}[] = new Array();
 
     const day = date.day();
 
@@ -28,18 +28,18 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
         const state = String(sheet.getCell(row.rowIndex - 1, colIndex).value)?.trim();
 
         if (state.toUpperCase() === PRESENT) {
-            present.push(`${rank} ${name}`);
+            present.push({ value: `${rank} ${name}` });
             continue;
         }
 
         // Unaccounted
         if (!state || !state?.trim() || state === "null") {
-            unaccounted.push(`${rank} ${name}`);
+            unaccounted.push({ value: `${rank} ${name}` });
             continue;
         }
 
         if (state?.includes("from")) {
-            absent.push(`${rank} ${name} (${state})`);
+            absent.push({ value: `${rank} ${name} (${state})` });
             continue;
         }
 
@@ -53,7 +53,7 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
                     const endDate = moment(splittedDates[1], 'DD/MM');
 
                     if (date.isBetween(startDate, endDate) || date.isSame(startDate, 'day') || date.isSame(endDate, 'day')) {
-                        absent.push(`${rank} ${name} (${remarks})`);
+                        absent.push({ value: `${rank} ${name} (${remarks})`, hasDuration: true });
                         isAppended = true;
                     }
                     break;
@@ -93,8 +93,8 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
                 const startDate = date.clone().subtract(daysToSubtractToStartDate, 'days');
                 const endDate = date.clone().add(daysToAddToEndDate, 'days');
 
-                absent.push(`${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})`);
                 hasDuration = true;
+                absent.push({ value: `${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})`, hasDuration });
                 break;
             }
         }
@@ -102,7 +102,7 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
             continue;
         }
 
-        absent.push(`${rank} ${name} (${state})`);
+        absent.push({ value: `${rank} ${name} (${state})`, hasDuration });
     }
 
     return { present, absent, unaccounted };

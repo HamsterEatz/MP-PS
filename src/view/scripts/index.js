@@ -8,7 +8,13 @@ const loadingSpinner = document.getElementById('loadingSpinner');
 
 const res = document.getElementById("res");
 
-const origin_url = `${location.origin}/api`;
+function toggleButtons() {
+    copyToClipboardButton.style.visibility = "visible";
+    loadingSpinner.style.visibility = 'hidden';
+    fpButton.disabled = false;
+    lpButton.disabled = false;
+    remarksButton.disabled = false;
+}
 
 fpButton.onclick = (e) => {
     copyToClipboardButton.style.visibility = "hidden";
@@ -18,19 +24,7 @@ fpButton.onclick = (e) => {
     remarksButton.disabled = true;
     res.innerHTML = '';
 
-    $.ajax({
-        type: 'GET',
-        url: `${origin_url}/firstParadeState`,
-        cors: true,
-        success: function (data) {
-            res.innerHTML = data;
-            copyToClipboardButton.style.visibility = "visible";
-            loadingSpinner.style.visibility = 'hidden';
-            fpButton.disabled = false;
-            lpButton.disabled = false
-            remarksButton.disabled = false;
-        }
-    });
+    getParadeState(true, toggleButtons);
 }
 
 lpButton.onclick = (e) => {
@@ -41,19 +35,7 @@ lpButton.onclick = (e) => {
     remarksButton.disabled = true;
     res.innerHTML = '';
 
-    $.ajax({
-        type: 'GET',
-        url: `${origin_url}/lastParadeState`,
-        cors: true,
-        success: function (data) {
-            res.innerHTML = data;
-            copyToClipboardButton.style.visibility = "visible";
-            loadingSpinner.style.visibility = 'hidden';
-            fpButton.disabled = false;
-            lpButton.disabled = false;
-            remarksButton.disabled = false;
-        }
-    });
+    getParadeState(false, toggleButtons);
 }
 
 remarksButton.onclick = (e) => {
@@ -70,11 +52,7 @@ remarksButton.onclick = (e) => {
         cors: true,
         success: function (data) {
             res.innerHTML = data;
-            copyToClipboardButton.style.visibility = "visible";
-            loadingSpinner.style.visibility = 'hidden';
-            fpButton.disabled = false;
-            lpButton.disabled = false;
-            remarksButton.disabled = false;
+            toggleButtons();
         }
     });
 }
