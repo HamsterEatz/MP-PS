@@ -8,42 +8,34 @@ const loadingSpinner = document.getElementById('loadingSpinner');
 
 const res = document.getElementById("res");
 
-function toggleButtons() {
-    copyToClipboardButton.style.visibility = "visible";
-    loadingSpinner.style.visibility = 'hidden';
-    fpButton.disabled = false;
-    lpButton.disabled = false;
-    remarksButton.disabled = false;
+let hasUnaccounted = false;
+$('[data-toggle="tooltip"]').tooltip({ trigger: 'click' });
+
+function toggleButtons(isDisabled) {
+    copyToClipboardButton.style.visibility = isDisabled ? "hidden" : "visible";
+    loadingSpinner.style.visibility = isDisabled ? 'visible' : 'hidden';
+    fpButton.disabled = isDisabled;
+    lpButton.disabled = isDisabled;
+    remarksButton.disabled = isDisabled;
 }
 
 fpButton.onclick = (e) => {
-    copyToClipboardButton.style.visibility = "hidden";
-    loadingSpinner.style.visibility = 'visible';
-    fpButton.disabled = true;
-    lpButton.disabled = true;
-    remarksButton.disabled = true;
+    hasUnaccounted = false;
+    toggleButtons(true);
     res.innerHTML = '';
-
-    getParadeState(true, toggleButtons);
+    getParadeState(true, () => toggleButtons(false));
 }
 
 lpButton.onclick = (e) => {
-    copyToClipboardButton.style.visibility = "hidden";
-    loadingSpinner.style.visibility = 'visible';
-    fpButton.disabled = true;
-    lpButton.disabled = true;
-    remarksButton.disabled = true;
+    hasUnaccounted = false;
+    toggleButtons(true);
     res.innerHTML = '';
-
-    getParadeState(false, toggleButtons);
+    getParadeState(false, () => toggleButtons(false));
 }
 
 remarksButton.onclick = (e) => {
-    copyToClipboardButton.style.visibility = "hidden";
-    loadingSpinner.style.visibility = 'visible';
-    fpButton.disabled = true;
-    lpButton.disabled = true;
-    remarksButton.disabled = true;
+    hasUnaccounted = false;
+    toggleButtons(true);
     res.innerHTML = '';
 
     $.ajax({
@@ -52,11 +44,15 @@ remarksButton.onclick = (e) => {
         cors: true,
         success: function (data) {
             res.innerHTML = data;
-            toggleButtons();
+            toggleButtons(false);
         }
     });
 }
 
 copyToClipboardButton.onclick = (e) => {
     navigator.clipboard.writeText(document.getElementById("res").innerHTML);
+    window.setTimeout(() => $('#copyToClipboardButton').tooltip('hide'), 2000);
+    if (hasUnaccounted) {
+        $("#unaccountedModal").modal('show');
+    }
 }

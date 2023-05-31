@@ -1,6 +1,9 @@
 import { PRESENT, LEGENDS } from "../constants";
 import moment, { Moment } from 'moment';
 import gSheetsInit from "./gSheetsInit";
+import getContacts from "./getContacts";
+
+let contacts: any[];
 
 export default async function getParadeState(isFirstParade: boolean, date: Moment) {
     const doc = await gSheetsInit();
@@ -34,7 +37,7 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
 
         // Unaccounted
         if (!state || !state?.trim() || state === "null") {
-            unaccounted.push({ value: `${rank} ${name}` });
+            unaccounted.push({ value: `${rank} ${name}`, contact: await getContact(rank, name) });
             continue;
         }
 
@@ -53,7 +56,7 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
                     const endDate = moment(splittedDates[1], 'DD/MM');
 
                     if (date.isBetween(startDate, endDate) || date.isSame(startDate, 'day') || date.isSame(endDate, 'day')) {
-                        absent.push({ value: `${rank} ${name} (${remarks})`, hasDuration: true });
+                        absent.push({ value: `${rank} ${name} (${remarks})` });
                         isAppended = true;
                     }
                     break;
@@ -94,7 +97,7 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
                 const endDate = date.clone().add(daysToAddToEndDate, 'days');
 
                 hasDuration = true;
-                absent.push({ value: `${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})`, hasDuration });
+                absent.push({ value: `${rank} ${name} (${state} from ${startDate.format('DD/MM')}-${endDate.format('DD/MM')})` });
                 break;
             }
         }
@@ -102,8 +105,22 @@ export default async function getParadeState(isFirstParade: boolean, date: Momen
             continue;
         }
 
-        absent.push({ value: `${rank} ${name} (${state})`, hasDuration });
+        absent.push({ value: `${rank} ${name} (${state})` });
     }
 
     return { present, absent, unaccounted };
+}
+
+async function getContact(rank: string, name: string) {
+    // Only trigger async fetch once
+    if (!contacts) {
+        contacts = await getContacts();
+    }
+
+    for (const contact of contacts) {
+        if (contact.name === name && contact.rank === rank) {
+            return contact;
+        }
+    }
+    return null;
 }
