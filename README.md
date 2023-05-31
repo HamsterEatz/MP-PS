@@ -2,9 +2,11 @@
 
 > ### Note: This is made only for personnels within `Stagmont Camp HQ Signals Command & Systems Manpower Branch` only!
 
-> ### Note 2: `THIS PROJECT IS UNDER DEVELOPMENT`
+> ### Application is currently live!
 
 This project aims to simplify the workflow for POCs, when tasked to submit parade state on roll call.
+
+You can access the deployed application here: https://mp-ps.onrender.com/
 
 #### Documentation
 
