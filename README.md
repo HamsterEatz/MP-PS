@@ -1,5 +1,8 @@
 # Manpower Branch Parade State Webpage
 
+# DEPRECATED!!!
+### Please visit https://hqsigs-mp-ps.vercel.app/ instead!
+
 > ### Note: This is made only for personnels within `Stagmont Camp HQ Signals Command & Systems Manpower Branch` only!
 
 > ### Application is currently live!
